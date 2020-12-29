@@ -84,7 +84,51 @@ class PockerHand():
         """Возвращает список рангов (его числовой эквивалент),
         отсортированный от большего к меньшему"""
 
+        street = self.check_street()
+        if street:
+            print('Find street index on {}, size {} '.format(street[1], street[0]))
+
+        # Роял флеш: от 10 до Туза
+        # Стрит флэш: Пять последовательных карт одной масти
+        # Каре: Четыре карты одного достоинства
+        # Фулл-хаус: Три карты одного достоинства и два другого
+        # Флеш: Сочетание из пяти карт одной масти(не по старшенству)
+        # Стрит: Пять карт подряд разной масти, но поочередного достоинства
+        # Сет: Три карты одного достоинства
+        # Две пары: Две пары карт одинакого достоинства
+        # Пара: Две карты одинакого достоинства
+        # Старшая карта: Сравнение по старшей карте
+
         return
+
+    def check_street(self):
+        streets = []
+
+        start_pos = 0
+        cards_count = 0
+        card_index = 0
+        for card in self.hand:
+            current_card = str(card[CARD])
+
+            card_pos = self.card_rank.find(current_card, 0, len(self.card_rank)-4)
+            if card_pos == -1:
+                break
+
+            try:
+                if self.hand[card_index+1][CARD] == self.card_rank[card_pos+1]:
+                    cards_count += 1
+
+                    if start_pos == 0:
+                        start_pos = card_index
+            except IndexError:
+                break
+            card_index += 1
+
+        if cards_count >= 5:
+            streets.append(start_pos)
+
+        return (cards_count, streets[0]) if len(streets) > 0 else False
+
 
     def flush(self):
         """Возвращает True, если все карты одной масти"""
@@ -143,8 +187,10 @@ def test_best_wild_hand():
 
 if __name__ == '__main__':
     test1 = PockerHand("6C 7C 8C 9C TC 5C JS")
+    test1.card_ranks()
 
     test2 = PockerHand("TD TC TH 7C 7D 8C 8S")
+    test2.card_ranks()
 
 
     # test_best_hand()
